@@ -1,0 +1,206 @@
+#UC1 Ability to create a Address Book Service DB
+
+create database AddressBookService;
+
+show databases;
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+#UC2 Ability to create a Address Book Table with first and last names, address,city,state, zip, phone number and email as its attributes
+
+USE AddressBookService;
+
+create table addressbook
+(firstName varchar(50) NOT NULL, lastName varchar(50) NOT NULL,mobileNumber varchar(20) NOT NULL,email varchar(50) NOT NULL, city varchar(50) NOT NULL, state varchar(50) NOT NULL,
+zip long NOT NULL, PRIMARY KEY(firstName));
+
+describe addressbook;
+
+------------------------------------------------------------------------------------------------------------------------------------
+
+#UC3 Ability to insert new Contacts to Address Book
+
+INSERT INTO addressbook(firstName,lastName,mobileNumber,email,city,state,zip) VALUES
+('Akshatha','Nagaraju','9854712563','abc@gmail.com','Jalgaon','Maharashtra',425001),
+('Arpitha','Sonawane','7757877309','arpi@gmail.com','Pune','Mahrashtra',411033),
+('Manoj','Mishra','9370785156','manoj@gmail.com','Mysore','karnataka',411013);
+
+select * from addressbook;
+
+----------------------------------------------------------------------------------------------------------------------------------
+
+#UC4 Ability to edit existing contat person using their name
+
+UPDATE addressBook set MobileNumber= "8547120325" where FirstName='Akshatha';
+
+UPDATE addressBook set Zip= "560010" where FirstName='Akshatha';
+
+UPDATE addressBook set State= 'Telangana' where FirstName='Akshatha';
+
+UPDATE addressBook set City= 'Hyderabad' where FirstName='Akshatha';
+
+select * from addressBook;
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+ #UC5 Ability to delete a person using person's name
+
+ DELETE from addressBook where FirstName='Manoj';
+
+ select * from addressBook;
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
+ #UC6 Ability to Retrieve Person belonging to a City or State from the Address Book
+
+ INSERT INTO addressbook(firstName,lastName,mobileNumber,email,city,state,zip) VALUES
+ ('Kiran','Sonawane','9854712563','kiran@gmail.com','Bangalore','Karnataka',560039);
+
+ select * from addressbook;
+
+ SELECT * from addressBook where state = 'Karnataka';
+
+------------------------------------------------------------------------------------------------------------------------------------
+
+#UC7 Ability to understand the size of address book by City and State
+
+SELECT city,COUNT(city) as count from addressBook group by city;
+
+SELECT state,COUNT(state) as count from addressBook group by state;
+
+--------------------------------------------------------------------------------------------------------------------------------
+
+#UC8 Ability to retrieve entries sorted alphabetically by Person’s name for a given city
+
+select * from addressbook
+ORDER BY firstName, lastName;
+
+------------------------------------------------------------------------------------------------------------------------------------
+
+#UC9 Ability to identify each Address Book with name and Type.
+
+ alter table addressBook add type varchar(15) after lastName;
+
+ describe addressbook;
+
+ update addressBook set type = 'Family' where firstName = 'Kiran';
+
+ update addressBook set type = 'Profession' where firstName='Arpitha';
+
+ select * from addressbook;
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+#UC10 Ability to get number of contact persons i.e. count by type
+
+update addressBook set type = 'Profession' where firstName='Arpitha';
+
+update addressBook set type = 'Profession' where firstName='Kiran';
+
+select * from addressbook;
+
+select type, Count(type) from addressBook group by type;
+ 
+update addressBook set type = 'Friend' where firstName='Kiran';
+
+ select type, Count(type) from addressBook group by type;
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+#UC11 Ability to add person to both Friend and Family
+
+INSERT INTO addressbook(firstName,lastName,type,mobileNumber,email,city,state,zip) VALUES
+('Anusha','Rathod','Family','9632105478','xyz@yahoo.com','Mumbai','Maharashtra',400011);
+
+INSERT INTO addressbook(firstName,lastName,type,mobileNumber,email,city,state,zip) VALUES
+('Rakshitha','Sonawane','Friend','9856321478','abc@yahoo.com','Pune','Maharashtra',411027);
+
+select * from addressbook;
+ 
+------------------------------------------------------------------------------------------------------------------------------------- 
+
+ #UC12 Draw the ER Diagram for Address Book Service DB
+
+ CREATE TABLE  contacts
+ (firstName varchar(50) NOT NULL, lastName varchar(50) NOT NULL,
+mobileNumber varchar(20) NOT NULL,email varchar(50) NOT NULL, PRIMARY KEY(firstName));
+
+describe contacts;
+
+create table address (
+zip varchar(6) not null,
+state varchar(30) not null,
+primary key(zip));
+
+describe address;
+
+ALTER TABLE address
+ADD city varchar(50);
+
+describe address;
+
+create table contacts_address(
+firstname varchar(30) not null,
+zip varchar(6) not null,
+foreign key (firstname) references contacts(firstname),
+foreign key (zip) references address(zip));
+
+desc contacts_address;
+
+create table relations(
+type varchar(15),
+primary key(type));
+
+desc relations;
+
+create table contacts_relation(
+firstname varchar(30) not null,
+type varchar(15),
+foreign key (firstname) references contacts(firstname),
+foreign key(type) references relations(type));
+
+desc contacts_relation;
+
+insert into contacts values('Manoj','Sonawane','7852031478','abc@gmail.com'),
+('Nitin','Patil','6254782145','kohli@gmail.com'),
+('Ajay','Koli','6587425365','ajay@yahoo.com');
+
+select * from contacts;
+
+insert into relations values('family'),('friend'),('work');
+
+select * from relations;
+
+ insert into address values ('560039','Bangalore','Karnataka'),
+('560040','Mumbai','Maharashtra'),
+('560001','Chennai','Tamil Nadu');
+
+ select * from address;
+
+insert into contacts_relation values
+( 'Manoj', 'friend'),
+( 'Nitin', 'family'),
+( 'Manoj', 'friend');
+
+ select * from contacts_relation;
+
+insert into contacts_address values ('Manoj','560001');
+
+insert into contacts_address values ('Nitin','560039');
+
+insert into contacts_address values ('Manoj','560040');
+
+select * from contacts_address;
+ 
+ -----------------------------------------------------------------------------------------------------------------------------------
+ 
+ #UC13 Ensure all retrieve queries done especially in UC 6, UC 7, UC 8 and UC 10 are working with new table structure
+
+ select count(contacts.firstname) from contacts,contacts_address,address
+where contacts.firstname = contacts_address.firstname and contacts_address.zip = address.zip and address.state = 'karnataka';
+
+ select count(contacts.firstname) from contacts,contacts_address,address
+where contacts.firstname = contacts_address.firstname and contacts_address.zip = address.zip and address.city = 'karnataka';
+
+select type, Count(firstName) from contacts_relation group by type;
+
